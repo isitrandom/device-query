@@ -8,6 +8,7 @@ import std.algorithm.searching;
 import std.array;
 import core.thread;
 
+import std.range;
 import std.range.interfaces;
 
 struct DeviceInfo {
@@ -21,6 +22,8 @@ class RandomGenerator: InputRange!double {
 	private {
 		ulong index;
 		serial.device.SerialPort com;
+		double lastNumber;
+		bool isError;
 	}
 
 	this() {
@@ -53,40 +56,55 @@ class RandomGenerator: InputRange!double {
 
 		auto data = readInfo;
 		writeln("HELLO ", data.name);
+		popFront();
 	}
 
 	@property {
 		double front() {
-			throw new Exception("not implemented");
+			return lastNumber;
 		}
 
 		bool empty() {
-			return !com.closed();
+			return com.closed() || isError;
 		}
 	}
 
 	double moveFront() {
-		throw new Exception("not implemented");
+		popFront();
+		return front;
 	}
 
 	void popFront() {
-		throw new Exception("not implemented");
-	}
+		try {
+			lastNumber = readNumber();
+		} catch(Exception e) {
+				isError = true;
+				writeln(e.msg);
+			}
+		}
 
 	int opApply(int delegate(double) dg) {
 		int result = 0;
 
-		while(1) {
-			auto number = readNumber();
-			result = dg(number);
+		while(!isError) {
+			result = dg(front);
+			popFront();
 			if (result) break;
 		}
 
 		return result;
 	}
 
-	int opApply(int delegate(size_t, double)) {
-		throw new Exception("not implemented");
+	int opApply(int delegate(size_t, double) dg) {
+		int result = 0;
+
+		while(!isError) {
+			result = dg(index, front);
+			popFront();
+			if (result) break;
+		}
+
+		return result;
 	}
 
 	DeviceInfo readInfo() {
@@ -102,19 +120,6 @@ class RandomGenerator: InputRange!double {
 		}
 
 		throw new Exception("Can't get device info");
-	}
-
-	double readNumber() {
-		index++;
-		com.write("b\n");
-
-		auto data = read;
-
-		if(data.length > 0) {
-			return data[0].to!double;
-		}
-
-		throw new Exception("Can't read number.");
 	}
 
 	double[] opSlice(size_t begin, size_t end) {
@@ -148,6 +153,19 @@ class RandomGenerator: InputRange!double {
 	}
 
 	private {
+		double readNumber() {
+			index++;
+			com.write("b\n");
+
+			auto data = read;
+
+			if(data.length > 0) {
+				return data[0].to!double;
+			}
+
+			throw new Exception("Can't read number.");
+		}
+
 		string[] read() {
 			byte[512] data;
 			size_t size;
@@ -217,6 +235,10 @@ void main()
 		writeln(number);
 	}*/
 
+	/*
+	/// How many numbers we have to read until we get a 1
 	writeln(rng.countUntil(1));
+	*/
 
+	writeln(rng.take(1000).array);
 }
