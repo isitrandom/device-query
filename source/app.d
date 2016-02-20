@@ -107,9 +107,18 @@ class RandomGenerator: InputRange!double {
 		return result;
 	}
 
-	void selectPattern(int pattern) {
+	RandomGenerator selectPattern(int pattern) {
 		com.write("p:" ~ pattern.to!string ~ "\n");
 		popFront;
+
+		return this;
+	}
+
+	RandomGenerator selectNextPattern() {
+		com.write("a\na\n");
+		popFront;
+
+		return this;
 	}
 
 	DeviceInfo readInfo() {
@@ -215,8 +224,13 @@ void main()
 {
 	auto rng = new RandomGenerator("/dev/cu.usbmodem1411");
 
-	/// Select a particular pattern and display it
+	/*
+	/// Select a particular pattern and display the first number
 	rng.selectPattern(2).front.writeln;
+	*/
+
+	/// Select a particular pattern and display the first number
+	rng.selectNextPattern.front.writeln;
 
 	/*
 	/// Get a number at a certain index
