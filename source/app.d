@@ -107,6 +107,11 @@ class RandomGenerator: InputRange!double {
 		return result;
 	}
 
+	void selectPattern(int pattern) {
+		com.write("p:" ~ pattern.to!string ~ "\n");
+		popFront;
+	}
+
 	DeviceInfo readInfo() {
 		com.write("x\n");
 		auto data = read;
@@ -210,6 +215,9 @@ void main()
 {
 	auto rng = new RandomGenerator("/dev/cu.usbmodem1411");
 
+	/// Select a particular pattern and display it
+	rng.selectPattern(2).front.writeln;
+
 	/*
 	/// Get a number at a certain index
 	writeln(rng[100]);
@@ -227,7 +235,6 @@ void main()
 	writeln(rng[100..200]);
 	*/
 
-
 	/*
 	/// Infinite loop over the numbers
 
@@ -240,5 +247,9 @@ void main()
 	writeln(rng.countUntil(1));
 	*/
 
+	/*
+	/// take 1000 numbers from the rng and put them into an array
 	writeln(rng.take(1000).array);
+	*/
+
 }
