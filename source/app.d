@@ -144,8 +144,6 @@ class RandomGenerator: InputRange!double {
 			readNumber();
 		}
 
-		writeln(index);
-
 		return readNumber();
 	}
 
@@ -218,5 +216,7 @@ void main()
 	foreach(number; rng) {
 		writeln(number);
 	}*/
+
+	writeln(rng.countUntil(1));
 
 }
